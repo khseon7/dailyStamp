@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Local secrets (never commit real credentials)
+Secrets.xcconfig
+.env
+.env.*
+
+# Xcode user/local files
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+xcuserdata/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.moved-aside
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Build outputs
+DerivedData/
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM

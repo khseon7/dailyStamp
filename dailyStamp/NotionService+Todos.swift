@@ -6,6 +6,10 @@ extension NotionService {
             return []
         }
 
+        return try await fetchTodos(pageId: pageId)
+    }
+
+    func fetchTodos(pageId: String) async throws -> [TodoItem] {
         let blocks = try await fetchChildBlocks(pageId: pageId)
         return parseTodoBlocks(from: blocks)
     }

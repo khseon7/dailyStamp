@@ -16,9 +16,12 @@ struct ContentView: View {
                 Button {
                     Task { await viewModel.markAttendance() }
                 } label: {
-                    Label("출석 체크", systemImage: "checkmark.circle")
+                    Label(
+                        viewModel.hasTodayAttendance ? "출석 완료" : "출석 체크",
+                        systemImage: viewModel.hasTodayAttendance ? "checkmark.circle.fill" : "checkmark.circle"
+                    )
                 }
-                .disabled(viewModel.isLoading)
+                .disabled(viewModel.isLoading || viewModel.hasTodayAttendance)
             }
 
             HStack(spacing: 8) {

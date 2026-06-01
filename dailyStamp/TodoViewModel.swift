@@ -7,6 +7,7 @@ final class TodoViewModel: ObservableObject {
     @Published var inputText: String = ""
     @Published var editingTodoId: String?
     @Published var isLoading: Bool = false
+    @Published var hasTodayAttendance: Bool = false
     @Published var errorMessage: String?
     @Published var lastUpdatedAt: Date?
 
@@ -49,6 +50,10 @@ final class TodoViewModel: ObservableObject {
     }
 
     func markAttendance() async {
+        if hasTodayAttendance {
+            return
+        }
+
         await runTask {
             try await self.notionService.markAttendance()
             try await self.refreshTodos()
@@ -86,8 +91,13 @@ final class TodoViewModel: ObservableObject {
     }
 
     private func refreshTodos() async throws {
-        let items = try await notionService.fetchTodayTodos()
-        todos = items
+        if let pageId = try await notionService.findTodayAttendancePageId() {
+            hasTodayAttendance = true
+            todos = try await notionService.fetchTodos(pageId: pageId)
+        } else {
+            hasTodayAttendance = false
+            todos = []
+        }
         lastUpdatedAt = Date()
     }
 

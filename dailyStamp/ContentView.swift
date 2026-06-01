@@ -85,7 +85,7 @@ struct ContentView: View {
                 Spacer()
 
                 Button {
-                    Task { await viewModel.loadTodos() }
+                    Task { await viewModel.loadTodos(force: true) }
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }

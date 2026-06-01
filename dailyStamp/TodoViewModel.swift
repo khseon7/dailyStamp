@@ -3,6 +3,15 @@ import Combine
 
 @MainActor
 final class TodoViewModel: ObservableObject {
+    private struct Snapshot {
+        let todos: [TodoItem]
+        let hasTodayAttendance: Bool
+        let updatedAt: Date
+    }
+
+    private static let refreshTTL: TimeInterval = 3600
+    private static var cachedSnapshot: Snapshot?
+
     @Published var todos: [TodoItem] = []
     @Published var inputText: String = ""
     @Published var editingTodoId: String?
@@ -21,7 +30,11 @@ final class TodoViewModel: ObservableObject {
         self.init(notionService: NotionService())
     }
 
-    func loadTodos() async {
+    func loadTodos(force: Bool = false) async {
+        if !force, applySnapshotIfFresh() {
+            return
+        }
+
         await runTask {
             try await self.refreshTodos()
         }
@@ -40,7 +53,10 @@ final class TodoViewModel: ObservableObject {
                     isCompleted: currentState
                 )
             } else {
-                try await self.notionService.addTodoToTodayAttendance(title: title)
+                try await self.notionService.addTodoToTodayAttendance(
+                    title: title,
+                    afterBlockId: self.todos.last?.id
+                )
             }
 
             self.inputText = ""
@@ -99,6 +115,27 @@ final class TodoViewModel: ObservableObject {
             todos = []
         }
         lastUpdatedAt = Date()
+        cacheCurrentState()
+    }
+
+    private func applySnapshotIfFresh() -> Bool {
+        guard let snapshot = Self.cachedSnapshot else { return false }
+        let age = Date().timeIntervalSince(snapshot.updatedAt)
+        guard age < Self.refreshTTL else { return false }
+
+        todos = snapshot.todos
+        hasTodayAttendance = snapshot.hasTodayAttendance
+        lastUpdatedAt = snapshot.updatedAt
+        return true
+    }
+
+    private func cacheCurrentState() {
+        guard let lastUpdatedAt else { return }
+        Self.cachedSnapshot = Snapshot(
+            todos: todos,
+            hasTodayAttendance: hasTodayAttendance,
+            updatedAt: lastUpdatedAt
+        )
     }
 
     private func runTask(_ operation: () async throws -> Void) async {

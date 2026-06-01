@@ -14,17 +14,23 @@ extension NotionService {
         return parseTodoBlocks(from: blocks)
     }
 
-    func addTodoToTodayAttendance(title: String) async throws {
+    func addTodoToTodayAttendance(title: String, afterBlockId: String? = nil) async throws {
         guard let pageId = try await findTodayAttendancePageId() else {
             throw NotionServiceError.noTodayAttendance
         }
-        let blocks = try await fetchChildBlocks(pageId: pageId)
-        let afterBlockId = insertionAnchorBlockId(for: blocks)
+        let resolvedAfterBlockId: String?
+        if let afterBlockId {
+            resolvedAfterBlockId = afterBlockId
+        } else {
+            let blocks = try await fetchChildBlocks(pageId: pageId)
+            resolvedAfterBlockId = insertionAnchorBlockId(for: blocks)
+        }
+
         _ = try await appendTodoBlock(
             to: pageId,
             text: title,
             checked: false,
-            after: afterBlockId
+            after: resolvedAfterBlockId
         )
     }
 

@@ -139,6 +139,15 @@ struct ContentView: View {
             }
             .buttonStyle(.plain)
             .disabled(viewModel.isLoading)
+
+            Button {
+                Task { await viewModel.delete(todo: todo) }
+            } label: {
+                Image(systemName: "trash")
+                    .foregroundStyle(.red)
+            }
+            .buttonStyle(.plain)
+            .disabled(viewModel.isLoading)
         }
         .padding(.vertical, 2)
     }

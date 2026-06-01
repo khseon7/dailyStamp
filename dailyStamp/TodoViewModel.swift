@@ -65,6 +65,16 @@ final class TodoViewModel: ObservableObject {
         }
     }
 
+    func delete(todo: TodoItem) async {
+        await runTask {
+            try await self.notionService.deleteTodo(blockId: todo.id)
+            if self.editingTodoId == todo.id {
+                self.cancelEditing()
+            }
+            try await self.refreshTodos()
+        }
+    }
+
     func beginEditing(todo: TodoItem) {
         inputText = todo.title
         editingTodoId = todo.id

@@ -59,6 +59,14 @@ extension NotionService {
 
         _ = try await sendJSONRequest(url: url, method: "PATCH", payload: payload)
     }
+
+    func deleteTodo(blockId: String) async throws {
+        guard let url = URL(string: "\(baseURL)/blocks/\(blockId)") else {
+            throw NotionServiceError.invalidURL
+        }
+
+        _ = try await sendJSONRequest(url: url, method: "DELETE")
+    }
 }
 
 private extension NotionService {
